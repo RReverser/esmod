@@ -4,6 +4,7 @@
   "description": "Fast in-place import/export transpiler",
   "main": "index.js",
   "scripts": {
+    "bench": "node bench",
     "test": "node test"
   },
   "repository": {
@@ -27,5 +28,11 @@
   "homepage": "https://github.com/rreverser/esmod#readme",
   "dependencies": {
     "acorn": "^4.0.11"
+  },
+  "devDependencies": {
+    "benchmark": "^2.1.3",
+    "glob": "^7.1.1",
+    "pretty-bytes": "^4.0.2",
+    "pretty-ms": "^2.1.0"
   }
 }
