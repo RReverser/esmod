@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "bench": "node bench",
-    "test": "node test"
+    "test": "node test/test.js"
   },
   "repository": {
     "type": "git",
