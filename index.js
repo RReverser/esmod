@@ -1,47 +1,48 @@
 'use strict';
 
 var acorn = require('acorn');
+var Parser = acorn.Parser;
+var pp = Parser.prototype;
 
-acorn.plugins.transform_module = function (instance) {
-	// Kinda like JS engine pre-parsing:
-	// tokenizes inner block statements,
-	// including function bodies
-	// but doesn't create the AST
-	instance.parseBlock = function () {
-		var node = this.startNode();
-		var length = this.context.length;
-		do {
-			this.next();
-		} while (this.context.length >= length);
-		this.next(); // this.expect(tt.braceR);
-		node.body = [];
-		return this.finishNode(node, "BlockStatement");
-	};
+function CustomParser(input) {
+	Parser.call(this, {
+		sourceType: 'module'
+	}, input);
+}
 
-	instance.extend('parseImport', function (inner) {
-		return function () {
-			var node = inner.apply(this, arguments);
-			node.transformed = '<TODO:import>';
-			return node;
-		};
-	});
+var cp = CustomParser.prototype = Object.create(pp);
 
-	instance.extend('parseExport', function (inner) {
-		return function () {
-			var node = inner.apply(this, arguments);
-			node.transformed = '<TODO:export>';
-			return node;
-		};
-	});
+cp.constructor = CustomParser;
+
+// Kinda like JS engine pre-parsing:
+// tokenizes inner block statements,
+// including function bodies
+// but doesn't create the AST
+cp.parseBlock = function () {
+	var node = this.startNode();
+	var length = this.context.length;
+	do {
+		this.next();
+	} while (this.context.length >= length);
+	this.next(); // this.expect(tt.braceR);
+	node.body = [];
+	return this.finishNode(node, "BlockStatement");
+};
+
+cp.parseImport = function () {
+	var node = pp.parseImport.apply(this, arguments);
+	node.transformed = '<TODO:import>';
+	return node;
+};
+
+cp.parseExport = function () {
+	var node = pp.parseExport.apply(this, arguments);
+	node.transformed = '<TODO:export>';
+	return node;
 };
 
 function parse(input) {
-	return acorn.parse(input, {
-		sourceType: 'module',
-		plugins: {
-			transform_module: true
-		}
-	});
+	return new CustomParser(input).parse();
 }
 
 function generate(input, ast) {
